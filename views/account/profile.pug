@@ -2,7 +2,7 @@ extends ../layout
 
 block content
   .pb-2.mt-2.mb-4.border-bottom
-    h3 Profile Information
+    h3 Profile Information 
 
   form(action='/account/profile', method='POST')
     input(type='hidden', name='_csrf', value=_csrf)
@@ -34,6 +34,14 @@ block content
       label.col-md-3.col-form-label.font-weight-bold.text-right(for='website') Website
       .col-md-7
         input.form-control(type='text', name='website', id='website', value=user.profile.website, autocomplete='url')
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='scaninterval') Scan Interval in seconds
+      .col-md-7
+        input.form-control(type='number', name='scaninterval', id='scaninterval', value=user.profile.scaninterval, autocomplete)
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='listofwebsites') List of Scans websites
+      .col-md-7
+        textarea.form-control(name='listofwebsites', id='listofwebsites')=user.profile.listofwebsites
     .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right Gravatar
       .col-sm-4

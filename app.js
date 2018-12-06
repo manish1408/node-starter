@@ -61,6 +61,23 @@ mongoose.connection.on('error', (err) => {
 /**
  * Express configuration.
  */
+
+//node-cron
+var cron = require('node-cron');
+var Request = require("request");
+
+var JSONReport = new mongoose.Schema({
+  json: String,
+  insertAt: Date
+});
+
+
+var IsSchedulerStarted = false;
+var JSONReport = mongoose.model("JSONReport", JSONReport);
+var task;
+
+
+
 app.set('host', process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0');
 app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080);
 app.set('views', path.join(__dirname, 'views'));
@@ -99,6 +116,40 @@ app.use(lusca.xframe('SAMEORIGIN'));
 app.use(lusca.xssProtection(true));
 app.disable('x-powered-by');
 app.use((req, res, next) => {
+  if (req.user && req.user.profile.listofwebsites!='' && req.user.profile.scaninterval>0) {
+    if (!IsSchedulerStarted) {
+      //Start Node-Crons Jobs
+      console.log('Start Node-Crons Jobs');
+      task = cron.schedule(req.user.profile.scaninterval+' * * * * *', () => {
+        console.log('running a task every '+req.user.profile.scaninterval+'Seconds');
+        Request.get(req.user.profile.listofwebsites, (error, response, body) => {
+          if (error) {
+            return console.dir(error);
+          }
+          //console.dir(response);
+          console.dir('data Fetched from API');
+          var JSONReportData = new JSONReport({ json: JSON.stringify(response), insertAt: new Date() });
+          JSONReportData.save()
+            .then(item => {
+              console.log("item saved to database");
+            })
+            .catch(err => {
+              console.log("unable to save to database", err);
+            });
+        });
+      });
+      IsSchedulerStarted = true;
+    }
+  }
+  else {
+    IsSchedulerStarted = false;
+    if(task !=null && task !=undefined)
+    {
+      console.log('Destroy running node-crons job');
+      task.destroy();
+    }
+  }
+
   res.locals.user = req.user;
   next();
 });

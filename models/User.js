@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema({
     gender: String,
     location: String,
     website: String,
+    scaninterval:Number,
+    listofwebsites:String,
     picture: String
   }
 }, { timestamps: true });

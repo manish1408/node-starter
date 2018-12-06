@@ -44,6 +44,8 @@ exports.postLogin = (req, res, next) => {
     req.logIn(user, (err) => {
       if (err) { return next(err); }
       req.flash('success', { msg: 'Success! You are logged in.' });
+      console.log('user');
+      console.log(user);
       res.redirect(req.session.returnTo || '/');
     });
   })(req, res, next);
@@ -147,6 +149,8 @@ exports.postUpdateProfile = (req, res, next) => {
     user.profile.gender = req.body.gender || '';
     user.profile.location = req.body.location || '';
     user.profile.website = req.body.website || '';
+    user.profile.scaninterval = req.body.scaninterval || '';
+     user.profile.listofwebsites = req.body.listofwebsites || '';
     user.save((err) => {
       if (err) {
         if (err.code === 11000) {
