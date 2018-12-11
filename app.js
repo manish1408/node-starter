@@ -116,17 +116,19 @@ app.use(lusca.xframe('SAMEORIGIN'));
 app.use(lusca.xssProtection(true));
 app.disable('x-powered-by');
 app.use((req, res, next) => {
-  if (req.user && req.user.profile.listofwebsites!='' && req.user.profile.scaninterval>0) {
+  if (req.user && req.user.profile.listofwebsites != '' && req.user.profile.scaninterval > 0) {
     if (!IsSchedulerStarted) {
       //Start Node-Crons Jobs
       console.log('Start Node-Crons Jobs');
-      task = cron.schedule(req.user.profile.scaninterval+' * * * * *', () => {
-        console.log('running a task every '+req.user.profile.scaninterval+'Seconds');
-        Request.get(req.user.profile.listofwebsites, (error, response, body) => {
+      task = cron.schedule(req.user.profile.scaninterval + ' * * * * *', () => {
+        console.log('running a task every ' + req.user.profile.scaninterval + 'Seconds');
+        var url = 'https://content.googleapis.com/pagespeedonline/v5/runPagespeed?url=' + req.user.profile.listofwebsites + '&key=AIzaSyCpGJZ0vg7LMu7o4om1VjNJHBFeqwOpZmA';
+        Request.get(url, (error, response, body) => {
           if (error) {
             return console.dir(error);
           }
-          //console.dir(response);
+          console.log('Page speed insignts API run for :' + req.user.profile.listofwebsites);
+          // console.dir(response);
           console.dir('data Fetched from API');
           var JSONReportData = new JSONReport({ json: JSON.stringify(response), insertAt: new Date() });
           JSONReportData.save()
@@ -143,8 +145,7 @@ app.use((req, res, next) => {
   }
   else {
     IsSchedulerStarted = false;
-    if(task !=null && task !=undefined)
-    {
+    if (task != null && task != undefined) {
       console.log('Destroy running node-crons job');
       task.destroy();
     }
