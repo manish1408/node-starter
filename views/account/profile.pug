@@ -38,10 +38,20 @@ block content
       label.col-md-3.col-form-label.font-weight-bold.text-right(for='scaninterval') Scan Interval in seconds
       .col-md-7
         input.form-control(type='number', name='scaninterval', id='scaninterval', value=user.profile.scaninterval, autocomplete)
+    //- .form-group.row
+    //-   label.col-md-3.col-form-label.font-weight-bold.text-right(for='listofwebsites') List of Scans websites
+    //-   .col-md-7
+    //-     textarea.form-control(name='listofwebsites', id='listofwebsites')=user.profile.listofwebsites
     .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right(for='listofwebsites') List of Scans websites
-      .col-md-7
-        textarea.form-control(name='listofwebsites', id='listofwebsites')=user.profile.listofwebsites
+      input(type='hidden', id='hdnlistofwebsites', value=user.profile.listofwebsites)
+      .col-md-7.myctrl
+         .input-group.col-xs-3.entry.static-form
+            input.form-control(type='text', name='listofwebsites', autocomplete)
+            span.input-group-btn
+              button.btn.btn-success.btn-add(type='button') 
+                span.fas.fa-plus.fa-sm
+                
     .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right Gravatar
       .col-sm-4

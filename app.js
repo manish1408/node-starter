@@ -65,6 +65,10 @@ mongoose.connection.on('error', (err) => {
 //node-cron
 var cron = require('node-cron');
 var Request = require("request");
+var Monitor = require('ping-monitor');
+var sslChecker = require('ssl-checker');
+var checkBrokenLinks = require('check-broken-links')
+
 
 var JSONReport = new mongoose.Schema({
   json: String,
@@ -72,7 +76,9 @@ var JSONReport = new mongoose.Schema({
 });
 
 
+//SHIV Remove This Comment After Develop Admin Panel
 var IsSchedulerStarted = false;
+//var IsSchedulerStarted = true;
 var JSONReport = mongoose.model("JSONReport", JSONReport);
 var task;
 
@@ -120,25 +126,112 @@ app.use((req, res, next) => {
     if (!IsSchedulerStarted) {
       //Start Node-Crons Jobs
       console.log('Start Node-Crons Jobs');
+
+
+
+
+
       task = cron.schedule(req.user.profile.scaninterval + ' * * * * *', () => {
         console.log('running a task every ' + req.user.profile.scaninterval + 'Seconds');
-        var url = 'https://content.googleapis.com/pagespeedonline/v5/runPagespeed?url=' + req.user.profile.listofwebsites + '&key=AIzaSyCpGJZ0vg7LMu7o4om1VjNJHBFeqwOpZmA';
-        Request.get(url, (error, response, body) => {
-          if (error) {
-            return console.dir(error);
-          }
-          console.log('Page speed insignts API run for :' + req.user.profile.listofwebsites);
-          // console.dir(response);
-          console.dir('data Fetched from API');
-          var JSONReportData = new JSONReport({ json: JSON.stringify(response), insertAt: new Date() });
-          JSONReportData.save()
-            .then(item => {
-              console.log("item saved to database");
-            })
-            .catch(err => {
-              console.log("unable to save to database", err);
-            });
-        });
+
+
+        console.log(req.user.profile.listofwebsites);
+        var listofwebsites = req.user.profile.listofwebsites;
+        listofwebsites = listofwebsites.split(',');
+        console.log(listofwebsites);
+        for (var i = 0; i < listofwebsites.length; i++) {
+          if (listofwebsites[i] == '') continue;
+          console.log('Task running for website=' + listofwebsites[i]);
+          //Ping Task Started
+          const myWebsite = new Monitor({
+            website: listofwebsites[i],
+            interval: 10
+          });
+          myWebsite.on('up', function (res) {
+            console.log('Yay!! ' + res.website + ' is up.');
+          });
+
+
+          myWebsite.on('down', function (res) {
+            console.log('Oh Snap!! ' + res.website + ' is down! ' + res.statusMessage);
+          });
+
+
+          myWebsite.on('stop', function (website) {
+            console.log(website + ' monitor has stopped.');
+          });
+          //Ping Task End
+
+
+          //SSL Check Task Start
+          sslChecker(listofwebsites[i], ).then(res => {
+
+             var JSONReportData = new JSONReport({ json: JSON.stringify(res), insertAt: new Date() });
+              JSONReportData.save()
+                .then(item => {
+                  console.log("item saved to database for sslChecker");
+                })
+                .catch(err => {
+                  console.log("unable to save to database for sslChecker", err);
+              });
+            
+            console.log(res)
+          }).catch(error => {
+            console.log(error);
+          });
+          //SSl Check Task End
+
+          //check-broken-links Task Start
+
+          const containsBroken = [
+            'https://' + listofwebsites[i] + '/',
+          ]
+          checkBrokenLinks('https://' + listofwebsites[i] + '/', containsBroken).then(brokenlinks => {
+            console.log('brokenlinks Success')
+            console.log(brokenlinks)
+            /*
+            { top: [ { url: 'https://www.iAMbroken.com', err: [Object] } ],
+              crawled:
+              [ { link: 'https://iwasinside.com/iCONTAINbrokenlinks ',
+                  sources: [ 'https://iwasfoundinthislinkyou supplied.com', 'https://butalsointhisone.com' ] }
+              ] },
+              allchecked: { [ link: '', sources: [] ] } // This would obviously be populated
+            */
+          }).catch(error => {
+            console.log('Error In checkBrokenLinks');
+            console.log(error);
+          })
+
+          //check-broken-links Task End
+
+
+          //Request Website and Save Response Task Started
+          Request.get('https://content.googleapis.com/pagespeedonline/v5/runPagespeed?url=http://' + listofwebsites[i] + '&key=AIzaSyCpGJZ0vg7LMu7o4om1VjNJHBFeqwOpZmA', (error, response, body) => {
+            if (error) {
+              return console.dir(error);
+            }
+            console.log('Page speed insignts API run for :' + req.user.profile.listofwebsites);
+            // console.dir(response);
+            console.dir('data Fetched from API');
+            var JSONReportData = new JSONReport({ json: JSON.stringify(response), insertAt: new Date() });
+            JSONReportData.save()
+              .then(item => {
+                console.log("item saved to database");
+              })
+              .catch(err => {
+                console.log("unable to save to database", err);
+              });
+          });
+
+          //Request Website and Save Response Task End
+
+
+        }
+
+
+
+
+
       });
       IsSchedulerStarted = true;
     }
