@@ -32,6 +32,7 @@ dotenv.load({ path: '.env.example' });
  */
 const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
+const websiteController = require('./controllers/website');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 
@@ -65,10 +66,11 @@ mongoose.connection.on('error', (err) => {
 //node-cron
 var cron = require('node-cron');
 var Request = require("request");
-var Monitor = require('ping-monitor');
+//var Monitor = require('ping-monitor');
 var sslChecker = require('ssl-checker');
 var checkBrokenLinks = require('check-broken-links')
 
+const ping = require('./ping');
 
 var JSONReport = new mongoose.Schema({
   json: String,
@@ -127,40 +129,36 @@ app.use((req, res, next) => {
       //Start Node-Crons Jobs
       console.log('Start Node-Crons Jobs');
 
+      var listofwebsites = req.user.profile.listofwebsites;
+      listofwebsites = listofwebsites.split(',');
 
-
-
+      //Start Ping Task
+      ping.pingWebsite(listofwebsites,req.user.profile.scaninterval);
 
       task = cron.schedule(req.user.profile.scaninterval + ' * * * * *', () => {
         console.log('running a task every ' + req.user.profile.scaninterval + 'Seconds');
-
-
-        console.log(req.user.profile.listofwebsites);
-        var listofwebsites = req.user.profile.listofwebsites;
-        listofwebsites = listofwebsites.split(',');
-        console.log(listofwebsites);
         for (var i = 0; i < listofwebsites.length; i++) {
           if (listofwebsites[i] == '') continue;
           console.log('Task running for website=' + listofwebsites[i]);
-          //Ping Task Started
-          const myWebsite = new Monitor({
-            website: listofwebsites[i],
-            interval: 10
-          });
-          myWebsite.on('up', function (res) {
-            console.log('Yay!! ' + res.website + ' is up.');
-          });
+          // //Ping Task Started
+          // const myWebsite = new Monitor({
+          //   website: listofwebsites[i],
+          //   interval: 10
+          // });
+          // myWebsite.on('up', function (res) {
+          //   console.log('Yay!! ' + res.website + ' is up.');
+          // });
 
 
-          myWebsite.on('down', function (res) {
-            console.log('Oh Snap!! ' + res.website + ' is down! ' + res.statusMessage);
-          });
+          // myWebsite.on('down', function (res) {
+          //   console.log('Oh Snap!! ' + res.website + ' is down! ' + res.statusMessage);
+          // });
 
 
-          myWebsite.on('stop', function (website) {
-            console.log(website + ' monitor has stopped.');
-          });
-          //Ping Task End
+          // myWebsite.on('stop', function (website) {
+          //   console.log(website + ' monitor has stopped.');
+          // });
+          // //Ping Task End
 
 
           //SSL Check Task Start
@@ -256,7 +254,7 @@ app.use((req, res, next) => {
     && !req.path.match(/\./)) {
     req.session.returnTo = req.originalUrl;
   } else if (req.user
-    && (req.path === '/account' || req.path.match(/^\/api/))) {
+    && (req.path === '/account' || req.path==='/website' || req.path.match(/^\/api/))) {
     req.session.returnTo = req.originalUrl;
   }
   next();
@@ -283,6 +281,9 @@ app.post('/signup', userController.postSignup);
 app.get('/contact', contactController.getContact);
 app.post('/contact', contactController.postContact);
 app.get('/account', passportConfig.isAuthenticated, userController.getAccount);
+app.get('/website', passportConfig.isAuthenticated, websiteController.getWebsite);
+app.post('/website', passportConfig.isAuthenticated, websiteController.postWebsite);
+app.delete('/website/:id', passportConfig.isAuthenticated, websiteController.deleteWebsite);
 app.post('/account/profile', passportConfig.isAuthenticated, userController.postUpdateProfile);
 app.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);

@@ -1,0 +1,73 @@
+extends ../layout
+block content
+  .pb-2.mt-2.mb-4.border-bottom
+    h3 Website Management
+  form(method='POST')
+    input(type='hidden', id="_csrf" name='_csrf', value=_csrf)
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='Url') Url
+      .col-md-7
+        input.form-control(type='text', name='Url', id='Url', autocomplete='Url')
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='WebsiteName') WebsiteName
+      .col-md-7
+        input.form-control(type='text', name='WebsiteName', id='WebsiteName', autocomplete='WebsiteName')
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='GoogleMonitorInterval') Google Monitor Interval 
+      .col-md-7
+        input.form-control(type='number', name='GoogleMonitorInterval', id='GoogleMonitorInterval', autocomplete='GoogleMonitorInterval')
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='UptimeMonitorInterval') Uptime Monitor Interval 
+      .col-md-7
+        input.form-control(type='number', name='UptimeMonitorInterval', id='UptimeMonitorInterval', autocomplete='UptimeMonitorInterval')
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='SSLMonitorInterval') SSL Monitor Interval 
+      .col-md-7
+        input.form-control(type='number', name='SSLMonitorInterval', id='SSLMonitorInterval', autocomplete='SSLMonitorInterval')
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='BrokenLinksInterval') Broken Links Interval 
+      .col-md-7
+        input.form-control(type='number', name='BrokenLinksInterval', id='BrokenLinksInterval', autocomplete='BrokenLinksInterval')
+    .form-group
+      .offset-sm-3.col-md-7.pl-2
+        button.btn.btn-primary(type='submit')
+          i.fas.fa-check-circle.fa-sm
+          | Saved
+
+
+  .pb-2.mt-2.mb-4.border-bottom
+    h3 Website Data
+    table#pickle.table.table-hover.table-striped.table-bordered
+      thead
+          tr
+              th #
+              th URL
+              th Website Name
+              th Google Monitor Interval
+              th Uptime Monitor Interval
+              th SSL Monitor Interval
+              th Broken Links Interval
+              th Creation Date
+              th Operation
+      tbody
+        each website, i in websites
+          tr
+              th(scope='row')= i+1
+              td=website.Url
+              td=website.WebsiteName
+              td=website.GoogleMonitorInterval
+              td=website.UptimeMonitorInterval
+              td=website.SSLMonitorInterval
+              td=website.BrokenLinksInterval
+              td=website.CreationDate
+              td 
+                button.btn.website-delete-buuton.btn-danger(onclick='fnDeleteWebsite(\'' + website.id + '\')')
+                 i.fas.fa-trash.fa-sm
+                  
+        if (websites.length==0)
+          tr
+              td.text-center(colspan='9') No Data Found
+
+
+  script(src='../../js/website.js')
+          
