@@ -122,8 +122,12 @@ exports.postSignup = (req, res, next) => {
  * Profile page.
  */
 exports.getAccount = (req, res) => {
+  const Countries = require('../models/countries.json');
+  console.log('Countries');
+  console.log(Countries);
   res.render('account/profile', {
-    title: 'Account Management'
+    title: 'Account Management',
+    Countries:Countries
   });
 };
 
@@ -146,9 +150,8 @@ exports.postUpdateProfile = (req, res, next) => {
     if (err) { return next(err); }
     user.email = req.body.email || '';
     user.profile.name = req.body.name || '';
-    user.profile.gender = req.body.gender || '';
-    user.profile.location = req.body.location || '';
-    user.profile.website = req.body.website || '';
+    user.profile.address = req.body.address || '';
+    user.profile.country = req.body.country || '';
     user.profile.scaninterval = req.body.scaninterval || '';
      user.profile.listofwebsites = req.body.listofwebsites || '';
     user.save((err) => {

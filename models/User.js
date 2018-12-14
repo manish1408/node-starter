@@ -19,9 +19,8 @@ const userSchema = new mongoose.Schema({
 
   profile: {
     name: String,
-    gender: String,
-    location: String,
-    website: String,
+    address: String,
+    country: String,
     scaninterval:Number,
     listofwebsites:String,
     picture: String

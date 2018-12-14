@@ -1085,10 +1085,9 @@ The class declaration creates a new class using prototype-based inheritance.
 
 ```js
 class Person {
-  constructor(name, age, gender) {
+  constructor(name, age) {
     this.name   = name;
     this.age    = age;
-    this.gender = gender;
   }
 
   incrementAge() {

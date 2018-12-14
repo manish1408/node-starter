@@ -64,7 +64,7 @@ passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_ID,
   clientSecret: process.env.FACEBOOK_SECRET,
   callbackURL: '/auth/facebook/callback',
-  profileFields: ['name', 'email', 'link', 'locale', 'timezone', 'gender'],
+  profileFields: ['name', 'email', 'link', 'locale', 'timezone'],
   passReqToCallback: true
 }, (req, accessToken, refreshToken, profile, done) => {
   if (req.user) {
@@ -79,7 +79,6 @@ passport.use(new FacebookStrategy({
           user.facebook = profile.id;
           user.tokens.push({ kind: 'facebook', accessToken });
           user.profile.name = user.profile.name || `${profile.name.givenName} ${profile.name.familyName}`;
-          user.profile.gender = user.profile.gender || profile._json.gender;
           user.profile.picture = user.profile.picture || `https://graph.facebook.com/${profile.id}/picture?type=large`;
           user.save((err) => {
             req.flash('info', { msg: 'Facebook account has been linked.' });
@@ -105,9 +104,8 @@ passport.use(new FacebookStrategy({
           user.facebook = profile.id;
           user.tokens.push({ kind: 'facebook', accessToken });
           user.profile.name = `${profile.name.givenName} ${profile.name.familyName}`;
-          user.profile.gender = profile._json.gender;
           user.profile.picture = `https://graph.facebook.com/${profile.id}/picture?type=large`;
-          user.profile.location = (profile._json.location) ? profile._json.location.name : '';
+          user.profile.address = (profile._json.location) ? profile._json.location.name : '';
           user.save((err) => {
             done(err, user);
           });
@@ -138,8 +136,8 @@ passport.use(new GitHubStrategy({
           user.tokens.push({ kind: 'github', accessToken });
           user.profile.name = user.profile.name || profile.displayName;
           user.profile.picture = user.profile.picture || profile._json.avatar_url;
-          user.profile.location = user.profile.location || profile._json.location;
-          user.profile.website = user.profile.website || profile._json.blog;
+          user.profile.address = user.profile.address || profile._json.location;
+          user.profile.country = user.profile.country || profile._json.blog;
           user.save((err) => {
             req.flash('info', { msg: 'GitHub account has been linked.' });
             done(err, user);
@@ -165,8 +163,8 @@ passport.use(new GitHubStrategy({
           user.tokens.push({ kind: 'github', accessToken });
           user.profile.name = profile.displayName;
           user.profile.picture = profile._json.avatar_url;
-          user.profile.location = profile._json.location;
-          user.profile.website = profile._json.blog;
+          user.profile.address = profile._json.location;
+          user.profile.country = profile._json.blog;
           user.save((err) => {
             done(err, user);
           });
@@ -197,7 +195,7 @@ passport.use(new TwitterStrategy({
           user.twitter = profile.id;
           user.tokens.push({ kind: 'twitter', accessToken, tokenSecret });
           user.profile.name = user.profile.name || profile.displayName;
-          user.profile.location = user.profile.location || profile._json.location;
+          user.profile.address = user.profile.address || profile._json.location;
           user.profile.picture = user.profile.picture || profile._json.profile_image_url_https;
           user.save((err) => {
             if (err) { return done(err); }
@@ -221,7 +219,7 @@ passport.use(new TwitterStrategy({
       user.twitter = profile.id;
       user.tokens.push({ kind: 'twitter', accessToken, tokenSecret });
       user.profile.name = profile.displayName;
-      user.profile.location = profile._json.location;
+      user.profile.address = profile._json.location;
       user.profile.picture = profile._json.profile_image_url_https;
       user.save((err) => {
         done(err, user);
@@ -251,7 +249,6 @@ passport.use(new GoogleStrategy({
           user.google = profile.id;
           user.tokens.push({ kind: 'google', accessToken });
           user.profile.name = user.profile.name || profile.displayName;
-          user.profile.gender = user.profile.gender || profile._json.gender;
           user.profile.picture = user.profile.picture || profile._json.image.url;
           user.save((err) => {
             req.flash('info', { msg: 'Google account has been linked.' });
@@ -277,7 +274,6 @@ passport.use(new GoogleStrategy({
           user.google = profile.id;
           user.tokens.push({ kind: 'google', accessToken });
           user.profile.name = profile.displayName;
-          user.profile.gender = profile._json.gender;
           user.profile.picture = profile._json.image.url;
           user.save((err) => {
             done(err, user);
@@ -310,9 +306,9 @@ passport.use(new LinkedInStrategy({
           user.linkedin = profile.id;
           user.tokens.push({ kind: 'linkedin', accessToken });
           user.profile.name = user.profile.name || profile.displayName;
-          user.profile.location = user.profile.location || profile._json.location.name;
+          user.profile.address = user.profile.address || profile._json.location.name;
           user.profile.picture = user.profile.picture || profile._json.pictureUrl;
-          user.profile.website = user.profile.website || profile._json.publicProfileUrl;
+          user.profile.country = user.profile.country || profile._json.publicProfileUrl;
           user.save((err) => {
             if (err) { return done(err); }
             req.flash('info', { msg: 'LinkedIn account has been linked.' });
@@ -338,7 +334,7 @@ passport.use(new LinkedInStrategy({
           user.tokens.push({ kind: 'linkedin', accessToken });
           user.email = profile._json.emailAddress;
           user.profile.name = profile.displayName;
-          user.profile.location = profile._json.location.name;
+          user.profile.address = profile._json.location.name;
           user.profile.picture = profile._json.pictureUrl;
           user.profile.website = profile._json.publicProfileUrl;
           user.save((err) => {
@@ -372,7 +368,7 @@ passport.use(new InstagramStrategy({
           user.tokens.push({ kind: 'instagram', accessToken });
           user.profile.name = user.profile.name || profile.displayName;
           user.profile.picture = user.profile.picture || profile._json.data.profile_picture;
-          user.profile.website = user.profile.website || profile._json.data.website;
+          user.profile.country = user.profile.country || profile._json.data.website;
           user.save((err) => {
             req.flash('info', { msg: 'Instagram account has been linked.' });
             done(err, user);
@@ -394,7 +390,7 @@ passport.use(new InstagramStrategy({
       // to get on with the registration process. It can be changed later
       // to a valid e-mail address in Profile Management.
       user.email = `${profile.username}@instagram.com`;
-      user.profile.website = profile._json.data.website;
+      user.profile.country = profile._json.data.website;
       user.profile.picture = profile._json.data.profile_picture;
       user.save((err) => {
         done(err, user);

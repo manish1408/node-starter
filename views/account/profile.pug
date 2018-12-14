@@ -15,25 +15,16 @@ block content
       .col-md-7
         input.form-control(type='text', name='name', id='name', value=user.profile.name, autocomplete='name')
     .form-group.row
-      label.col-md-3.col-form-label.font-weight-bold.text-right Gender
-      .col-sm-6
-        label.radio.col-sm-3
-          input(type='radio', checked=user.profile.gender=='male', name='gender', value='male', data-toggle='radio')
-          span Male
-        label.radio.col-sm-3
-          input(type='radio', checked=user.profile.gender=='female', name='gender', value='female', data-toggle='radio')
-          span Female
-        label.radio.col-sm-3
-          input(type='radio', checked=user.profile.gender=='other', name='gender', value='other', data-toggle='radio')
-          span Other
-    .form-group.row
-      label.col-md-3.col-form-label.font-weight-bold.text-right(for='location') Location
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='address') Address
       .col-md-7
-        input.form-control(type='text', name='location', id='location', value=user.profile.location, autocomplete)
+        input.form-control(type='text', name='address', id='address', value=user.profile.address, autocomplete)
     .form-group.row
-      label.col-md-3.col-form-label.font-weight-bold.text-right(for='website') Website
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='country') Country
       .col-md-7
-        input.form-control(type='text', name='website', id='website', value=user.profile.website, autocomplete='url')
+        //- input.form-control(type='text', name='country', id='country', value=user.profile.country, autocomplete='url')
+        select.form-control(name='country', id='country')
+         each country in Countries
+          option(value=country.name, selected=(country.name === user.profile.country))=country.name  
     .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right(for='scaninterval') Scan Interval in seconds
       .col-md-7
@@ -97,11 +88,6 @@ block content
     h3 Linked Accounts
   .form-group
     .offset-sm-3.col-md-7.pl-2
-      if user.instagram
-        p.mb-1: a.text-danger(href='/account/unlink/instagram') Unlink your Instagram account
-      else
-        p.mb-1: a(href='/auth/instagram') Link your Instagram account
-    .offset-sm-3.col-md-7.pl-2
       if user.google
         p.mb-1: a.text-danger(href='/account/unlink/google') Unlink your Google account
       else
@@ -116,18 +102,4 @@ block content
         p.mb-1: a.text-danger(href='/account/unlink/twitter') Unlink your Twitter account
       else
         p.mb-1: a(href='/auth/twitter') Link your Twitter account
-    .offset-sm-3.col-md-7.pl-2
-      if user.github
-        p.mb-1: a.text-danger(href='/account/unlink/github') Unlink your GitHub account
-      else
-        p.mb-1: a(href='/auth/github') Link your GitHub account
-    .offset-sm-3.col-md-7.pl-2
-      if user.linkedin
-        p.mb-1: a.text-danger(href='/account/unlink/linkedin') Unlink your LinkedIn account
-      else
-        p.mb-1: a(href='/auth/linkedin') Link your LinkedIn account
-    .offset-sm-3.col-md-7.pl-2
-      if user.steam
-        p.mb-1: a.text-danger(href='/account/unlink/steam') Unlink your Steam account
-      else
-        p.mb-1: a(href='/auth/steam') Link your Steam account
+    
